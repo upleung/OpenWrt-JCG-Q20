@@ -47,12 +47,57 @@ jobs:
           make download -j8
           make -j"$(nproc)" V=s || make -j1 V=s
       
-      - name: 收集固件
+      - name: 收集并验证固件 (Collect and verify firmware)
         working-directory: openwrt
         run: |
+          set -euo pipefail
+          
+          OUTDIR="bin/targets/ramips/mt7621"
+          
+          # 1. 检查输出目录是否存在
+          if [ ! -d "$OUTDIR" ]; then
+            echo "致命错误：输出目录 $OUTDIR 不存在！说明前面 make 编译彻底失败。"
+            exit 1
+          fi
+          
+          echo "==== 打印所有编译输出的文件 ===="
+          find "$OUTDIR" -maxdepth 2 -type f -printf '%P\n' | sort
+          
+          echo "==== 筛选固件候选文件 ===="
+          # 完美融合方案 C：自动抓取当前目录下所有的 .bin 和 .json 文件，无视设备代号
+          mapfile -t FW_FILES < <(
+            find "$OUTDIR" -maxdepth 1 -type f \( -name '*.bin' -o -name '*.json' \) -print | sort
+          )
+          
+          # 2. 严格校验是否生成了固件
+          if [ "${#FW_FILES[@]}" -eq 0 ]; then
+            echo "致命错误：没有检测到任何生成的 .bin 固件！"
+            echo "请往上翻看 'Build OpenWrt' 步骤的报错日志。"
+            exit 1
+          fi
+          
+          # 3. 复制固件到 release 目录
           mkdir -p ../release
-          find bin/targets/ramips/mt7621/ -maxdepth 1 -type f -name "*.bin" -exec cp {} ../release/ \;
-          cd ../release && sha256sum *.bin > SHA256SUMS
+          cp "${FW_FILES[@]}" ../release/
+          
+          # 4. 提取实用的编译元数据 (便于日后排查和记录)
+          for f in \
+            profiles.json \
+            config.buildinfo \
+            feeds.buildinfo \
+            version.buildinfo
+          do
+            if [ -f "$OUTDIR/$f" ]; then
+              cp "$OUTDIR/$f" ../release/
+            fi
+          done
+          
+          # 5. 生成 SHA256 校验和
+          cd ../release
+          sha256sum -- *.bin > SHA256SUMS
+          
+          echo "==== 最终准备发布的 Release 文件列表 ===="
+          ls -lah
       
       - name: 创建 GitHub Release
         env:

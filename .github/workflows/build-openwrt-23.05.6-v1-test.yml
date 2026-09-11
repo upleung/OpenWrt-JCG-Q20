@@ -116,6 +116,6 @@ jobs:
         run: |
           gh release create "$TAG" release/* \
             --title "OpenWrt 23.05.6 - JCG Q20 [V1 测试版]" \
-            --notes "⚠️ **此为初版测试固件 (V1 Beta)**<br><br>**测试重点：**<br>1. 验证 GitHub Actions 自动化编译流程是否跑通。<br>2. 验证方案 C（固件无差别抓取）是否成功提取文件。<br><br>基于官方 23.05.6 源码编译。" \
+            --notes "⚠️ **此为初版测试固件 (V1 Beta)**<br><br>**测试重点：**<br>1. 验证 GitHub Actions 自动化编译流程是否跑通。<br>2. 验证ChatGPT方案（CR6606新增型号编译）是否成功提取文件。<br><br>基于官方OpenWrt 23.05.6 源码编译。" \
             --prerelease || \
           gh release upload "$TAG" release/* --clobber

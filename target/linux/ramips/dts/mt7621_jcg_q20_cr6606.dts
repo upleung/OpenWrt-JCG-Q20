@@ -1,0 +1,54 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+#include "mt7621_xiaomi_mi-router-cr660x.dtsi"
+
+/ {
+	/*
+	 * JCG Q20 three-port hardware using the CR6606/CR660x
+	 * NAND and MT7621 hardware description.
+	 *
+	 * Verified physical mapping:
+	 *
+	 * Physical WAN
+	 *     -> CR660x switch port@0
+	 *     -> OpenWrt wan
+	 *
+	 * Physical LAN1
+	 *     -> CR660x switch port@1
+	 *     -> OpenWrt lan1
+	 *
+	 * Physical LAN2
+	 *     -> CR660x gmac1 / PHY4
+	 *     -> OpenWrt lan2
+	 *
+	 * switch port@2 does not exist as a physical RJ45 port
+	 * on this three-port PCB.
+	 */
+
+	compatible = "jcg,q20-cr6606", "mediatek,mt7621-soc";
+	model = "JCG Q20";
+};
+
+&gmac1 {
+	status = "okay";
+	label = "lan2";
+	phy-handle = <&ethphy4>;
+};
+
+&switch0 {
+	ports {
+		port@0 {
+			status = "okay";
+			label = "wan";
+		};
+
+		port@1 {
+			status = "okay";
+			label = "lan1";
+		};
+
+		port@2 {
+			status = "disabled";
+		};
+	};
+};

@@ -1,4 +1,4 @@
-name: Build OpenWrt JCG Q20
+name: Build OpenWrt JCG Q20 V1 TEST
 
 on:
   workflow_dispatch:

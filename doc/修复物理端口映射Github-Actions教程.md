@@ -171,7 +171,7 @@ OpenWrt-JCG-Q20/
 │       └── build-jcg-q20.yml
 │
 ├── config/
-│   └── jcg-q20-23.05.6.config
+│   └── official.config
 │
 ├── scripts/
 │   └── apply-jcg-q20.sh
@@ -657,7 +657,7 @@ echo
 新建：
 
 ```text
-config/jcg-q20-23.05.6.config
+config/official.config
 ```
 
 内容：
@@ -843,7 +843,7 @@ jobs:
         run: |
 
           cp \
-            ../config/jcg-q20-23.05.6.config \
+            ../config/official.config \
             .config
 
           make defconfig
@@ -1330,7 +1330,7 @@ Workflow C
 
 ```text
 .github/workflows/build-jcg-q20.yml
-config/jcg-q20-23.05.6.config
+config/official.config
 scripts/apply-jcg-q20.sh
 target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts
 ```
@@ -1343,7 +1343,7 @@ target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts
 
 ```text
 .github/workflows/build-jcg-q20.yml
-config/jcg-q20-23.05.6.config
+config/official.config
 scripts/apply-jcg-q20.sh
 target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts
 README.md

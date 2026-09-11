@@ -51,7 +51,7 @@ jobs:
         working-directory: openwrt
         run: |
           mkdir -p ../release
-          cp bin/targets/ramips/mt7621/*xiaomi_mi-router-cr6606*.bin ../release/
+          find bin/targets/ramips/mt7621/ -maxdepth 1 -type f -name "*.bin" -exec cp {} ../release/ \;
           cd ../release && sha256sum *.bin > SHA256SUMS
       
       - name: 创建 GitHub Release

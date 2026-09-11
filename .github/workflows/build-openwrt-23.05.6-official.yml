@@ -23,7 +23,7 @@ permissions:
 env:
   OPENWRT_VERSION: "23.05.6"
   OPENWRT_TAG: "v23.05.6"
-  PROFILE: "jcg_q20_cr6606"
+  PROFILE: "xiaomi_mi-router-cr6606"
   DEBIAN_FRONTEND: "noninteractive"
 
 jobs:
@@ -53,7 +53,7 @@ jobs:
         working-directory: openwrt
         run: |
           mkdir -p ../release
-          cp bin/targets/ramips/mt7621/*jcg_q20_cr6606*.bin ../release/
+          cp bin/targets/ramips/mt7621/*xiaomi_mi-router-cr6606*.bin ../release/
           cd ../release && sha256sum *.bin > SHA256SUMS
       - name: Prepare metadata
         id: meta

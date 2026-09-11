@@ -180,7 +180,7 @@ OpenWrt-JCG-Q20/
 │   └── linux/
 │       └── ramips/
 │           └── dts/
-│               └── mt7621_jcg_q20_cr6606.dts
+│               └── mt7621_xiaomi_mi-router-cr6606.dts
 │
 ├── README.md
 └── LICENSE
@@ -214,7 +214,7 @@ Release
 新建：
 
 ```text
-target/linux/ramips/dts/mt7621_jcg_q20_cr6606.dts
+target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts
 ```
 
 完整内容：
@@ -478,14 +478,14 @@ target/linux/ramips/image/mt7621.mk
 末尾加入：
 
 ```make
-define Device/jcg_q20_cr6606
+define Device/xiaomi_mi-router-cr6606
   $(Device/xiaomi_mi-router-cr660x)
   DEVICE_VENDOR := JCG
   DEVICE_MODEL := Q20
-  DEVICE_DTS := mt7621_jcg_q20_cr6606
+  DEVICE_DTS := mt7621_xiaomi_mi-router-cr6606
   SUPPORTED_DEVICES := jcg,q20-cr6606 xiaomi,mi-router-cr6606
 endef
-TARGET_DEVICES += jcg_q20_cr6606
+TARGET_DEVICES += xiaomi_mi-router-cr6606
 ```
 
 这里有三个关键点。
@@ -501,7 +501,7 @@ $(Device/xiaomi_mi-router-cr660x)
 ### 2. 使用自己的 DTS
 
 ```make
-DEVICE_DTS := mt7621_jcg_q20_cr6606
+DEVICE_DTS := mt7621_xiaomi_mi-router-cr6606
 ```
 
 ### 3. 支持从现有 CR6606 固件迁移
@@ -537,8 +537,8 @@ set -euo pipefail
 OPENWRT_DIR="${1:-openwrt}"
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-DTS_SRC="$ROOT_DIR/target/linux/ramips/dts/mt7621_jcg_q20_cr6606.dts"
-DTS_DST="$OPENWRT_DIR/target/linux/ramips/dts/mt7621_jcg_q20_cr6606.dts"
+DTS_SRC="$ROOT_DIR/target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts"
+DTS_DST="$OPENWRT_DIR/target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts"
 
 NETWORK="$OPENWRT_DIR/target/linux/ramips/mt7621/base-files/etc/board.d/02_network"
 LEDS="$OPENWRT_DIR/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds"
@@ -610,17 +610,17 @@ PY
 
 echo "==> Add JCG Q20 image profile"
 
-if ! grep -q '^define Device/jcg_q20_cr6606$' "$IMAGE"; then
+if ! grep -q '^define Device/xiaomi_mi-router-cr6606$' "$IMAGE"; then
 	cat >> "$IMAGE" <<'EOF'
 
-define Device/jcg_q20_cr6606
+define Device/xiaomi_mi-router-cr6606
   $(Device/xiaomi_mi-router-cr660x)
   DEVICE_VENDOR := JCG
   DEVICE_MODEL := Q20
-  DEVICE_DTS := mt7621_jcg_q20_cr6606
+  DEVICE_DTS := mt7621_xiaomi_mi-router-cr6606
   SUPPORTED_DEVICES := jcg,q20-cr6606 xiaomi,mi-router-cr6606
 endef
-TARGET_DEVICES += jcg_q20_cr6606
+TARGET_DEVICES += xiaomi_mi-router-cr6606
 EOF
 fi
 
@@ -635,8 +635,8 @@ grep -q 'status = "disabled"' "$DTS_DST"
 grep -q 'jcg,q20-cr6606)' "$NETWORK"
 grep -q 'jcg,q20-cr6606)' "$LEDS"
 
-grep -q '^define Device/jcg_q20_cr6606$' "$IMAGE"
-grep -q 'DEVICE_DTS := mt7621_jcg_q20_cr6606' "$IMAGE"
+grep -q '^define Device/xiaomi_mi-router-cr6606$' "$IMAGE"
+grep -q 'DEVICE_DTS := mt7621_xiaomi_mi-router-cr6606' "$IMAGE"
 
 echo
 echo "=============================================="
@@ -665,7 +665,7 @@ config/jcg-q20-23.05.6.config
 ```text
 CONFIG_TARGET_ramips=y
 CONFIG_TARGET_ramips_mt7621=y
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_jcg_q20_cr6606=y
+CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaomi_mi-router-cr6606=y
 CONFIG_TARGET_ROOTFS_SQUASHFS=y
 CONFIG_PACKAGE_luci=y
 ```
@@ -675,7 +675,7 @@ CONFIG_PACKAGE_luci=y
 ```text
 ramips
 └── mt7621
-    └── jcg_q20_cr6606
+    └── xiaomi_mi-router-cr6606
 ```
 
 ---
@@ -721,7 +721,7 @@ env:
   OPENWRT_VERSION: "23.05.6"
   OPENWRT_TAG: "v23.05.6"
 
-  PROFILE: "jcg_q20_cr6606"
+  PROFILE: "xiaomi_mi-router-cr6606"
 
   TZ: "Asia/Shanghai"
   DEBIAN_FRONTEND: "noninteractive"
@@ -874,7 +874,7 @@ jobs:
           grep -n \
             -A8 \
             -B2 \
-            'define Device/jcg_q20_cr6606' \
+            'define Device/xiaomi_mi-router-cr6606' \
             target/linux/ramips/image/mt7621.mk
 
           echo
@@ -884,7 +884,7 @@ jobs:
 
           sed -n \
             '1,220p' \
-            target/linux/ramips/dts/mt7621_jcg_q20_cr6606.dts
+            target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts
 
           echo
           echo "============================================"
@@ -958,9 +958,9 @@ jobs:
               -maxdepth 1 \
               -type f \
               \( \
-                -name '*jcg_q20_cr6606*.bin' \
+                -name '*xiaomi_mi-router-cr6606*.bin' \
                 -o \
-                -name '*jcg_q20_cr6606*.json' \
+                -name '*xiaomi_mi-router-cr6606*.json' \
               \) \
               -print
           )
@@ -1332,7 +1332,7 @@ Workflow C
 .github/workflows/build-jcg-q20.yml
 config/jcg-q20-23.05.6.config
 scripts/apply-jcg-q20.sh
-target/linux/ramips/dts/mt7621_jcg_q20_cr6606.dts
+target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts
 ```
 
 我已经把这一套整理成可直接放入仓库的压缩包：
@@ -1345,7 +1345,7 @@ target/linux/ramips/dts/mt7621_jcg_q20_cr6606.dts
 .github/workflows/build-jcg-q20.yml
 config/jcg-q20-23.05.6.config
 scripts/apply-jcg-q20.sh
-target/linux/ramips/dts/mt7621_jcg_q20_cr6606.dts
+target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts
 README.md
 ```
 
@@ -1424,7 +1424,7 @@ Profile 能否识别
 ```text
 CONFIG_TARGET_ramips=y
 CONFIG_TARGET_ramips_mt7621=y
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_jcg_q20_cr6606=y
+CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaomi_mi-router-cr6606=y
 ```
 
 ---
@@ -1484,11 +1484,11 @@ xiaomi_mi-router-cr6606-squashfs-sysupgrade.bin
 你的最终文件会类似：
 
 ```text
-openwrt-23.05.6-ramips-mt7621-jcg_q20_cr6606-initramfs-kernel.bin
+openwrt-23.05.6-ramips-mt7621-xiaomi_mi-router-cr6606-initramfs-kernel.bin
 
-openwrt-23.05.6-ramips-mt7621-jcg_q20_cr6606-squashfs-firmware.bin
+openwrt-23.05.6-ramips-mt7621-xiaomi_mi-router-cr6606-squashfs-firmware.bin
 
-openwrt-23.05.6-ramips-mt7621-jcg_q20_cr6606-squashfs-sysupgrade.bin
+openwrt-23.05.6-ramips-mt7621-xiaomi_mi-router-cr6606-squashfs-sysupgrade.bin
 ```
 
 ---
@@ -1523,14 +1523,14 @@ board_name = xiaomi,mi-router-cr6606
 例如上传：
 
 ```bash
-scp openwrt-23.05.6-ramips-mt7621-jcg_q20_cr6606-squashfs-sysupgrade.bin root@192.168.50.1:/tmp/
+scp openwrt-23.05.6-ramips-mt7621-xiaomi_mi-router-cr6606-squashfs-sysupgrade.bin root@192.168.50.1:/tmp/
 ```
 
 然后：
 
 ```bash
 sysupgrade -n \
-/tmp/openwrt-23.05.6-ramips-mt7621-jcg_q20_cr6606-squashfs-sysupgrade.bin
+/tmp/openwrt-23.05.6-ramips-mt7621-xiaomi_mi-router-cr6606-squashfs-sysupgrade.bin
 ```
 
 **第一次不要保留 24.10.4 的配置。**
@@ -1868,7 +1868,7 @@ OpenWrt 23.05.6
        ↓
 CR660x 原始 DTS
        ↓
-新增 mt7621_jcg_q20_cr6606.dts
+新增 mt7621_xiaomi_mi-router-cr6606.dts
        ↓
 compatible = "jcg,q20-cr6606"
 model = "JCG Q20"
@@ -1878,7 +1878,7 @@ port@1 → lan1
 gmac1/PHY4 → lan2
 port@2 → disabled
        ↓
-自定义 Device/jcg_q20_cr6606
+自定义 Device/xiaomi_mi-router-cr6606
        ↓
 GitHub Actions
        ↓

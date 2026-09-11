@@ -49,21 +49,73 @@ jobs:
       - name: Build OpenWrt
         working-directory: openwrt
         run: make -j"$(nproc)" V=s || make -j1 V=s
-      - name: Collect firmware
+        
+      - name: 收集并验证固件 (Collect and verify firmware)
         working-directory: openwrt
         run: |
+          set -euo pipefail
+          
+          OUTDIR="bin/targets/ramips/mt7621"
+          
+          # 1. 检查输出目录是否存在
+          if [ ! -d "$OUTDIR" ]; then
+            echo "致命错误：输出目录 $OUTDIR 不存在！说明前面 make 编译彻底失败。"
+            exit 1
+          fi
+          
+          echo "==== 打印所有编译输出的文件 ===="
+          find "$OUTDIR" -maxdepth 2 -type f -printf '%P\n' | sort
+          
+          echo "==== 筛选固件候选文件 ===="
+          # 自动抓取当前目录下所有的 .bin 和 .json 文件，无视设备代号
+          mapfile -t FW_FILES < <(
+            find "$OUTDIR" -maxdepth 1 -type f \( -name '*.bin' -o -name '*.json' \) -print | sort
+          )
+          
+          # 2. 严格校验是否生成了固件
+          if [ "${#FW_FILES[@]}" -eq 0 ]; then
+            echo "致命错误：没有检测到任何生成的 .bin 固件！"
+            echo "请往上翻看 'Build OpenWrt' 步骤的报错日志。"
+            exit 1
+          fi
+          
+          # 3. 复制固件到 release 目录
           mkdir -p ../release
-          cp bin/targets/ramips/mt7621/*jcg_q20_cr6606*.bin ../release/
-          cd ../release && sha256sum *.bin > SHA256SUMS
-      - name: Prepare metadata
+          cp "${FW_FILES[@]}" ../release/
+          
+          # 4. 提取实用的编译元数据 (便于日后排查和记录)
+          for f in \
+            profiles.json \
+            config.buildinfo \
+            feeds.buildinfo \
+            version.buildinfo
+          do
+            if [ -f "$OUTDIR/$f" ]; then
+              cp "$OUTDIR/$f" ../release/
+            fi
+          done
+          
+          # 5. 生成 SHA256 校验和
+          cd ../release
+          sha256sum -- *.bin > SHA256SUMS
+          
+          echo "==== 最终准备发布的 Release 文件列表 ===="
+          ls -lah
+          
+      - name: 准备元数据 (Prepare metadata)
         id: meta
         run: |
           echo "tag=${{ inputs.release_tag || github.ref_name }}" >> $GITHUB_OUTPUT
           echo "publish=${{ inputs.publish_release || 'true' }}" >> $GITHUB_OUTPUT
-      - name: Create GitHub Release
+          
+      - name: 发布到 GitHub Releases (V1 测试版)
         if: steps.meta.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.meta.outputs.tag }}
         run: |
-          gh release create "$TAG" release/* --title "OpenWrt 23.05.6 - JCG Q20 ${TAG#v}" --notes "WAN -> wan | LAN1 -> lan1 | LAN2 -> lan2. Built from official 23.05.6 source." --latest || gh release upload "$TAG" release/* --clobber
+          gh release create "$TAG" release/* \
+            --title "OpenWrt 23.05.6 - JCG Q20 [V1 测试版]" \
+            --notes "⚠️ **此为初版测试固件 (V1 Beta)**<br><br>**测试重点：**<br>1. 验证 GitHub Actions 自动化编译流程是否跑通。<br>2. 验证方案 C（固件无差别抓取）是否成功提取文件。<br><br>基于官方 23.05.6 源码编译。" \
+            --prerelease || \
+          gh release upload "$TAG" release/* --clobber

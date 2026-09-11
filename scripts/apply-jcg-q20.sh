@@ -2,45 +2,38 @@
 set -euo pipefail
 
 OPENWRT_DIR="${1:-openwrt}"
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-DTS_SRC="$ROOT_DIR/target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts"
-DTS_DST="$OPENWRT_DIR/target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts"
+# 定位官方原版文件
+DTS_FILE="$OPENWRT_DIR/target/linux/ramips/dts/mt7621_xiaomi_mi-router-cr6606.dts"
+NETWORK_FILE="$OPENWRT_DIR/target/linux/ramips/mt7621/base-files/etc/board.d/02_network"
 
-NETWORK="$OPENWRT_DIR/target/linux/ramips/mt7621/base-files/etc/board.d/02_network"
-LEDS="$OPENWRT_DIR/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds"
-IMAGE="$OPENWRT_DIR/target/linux/ramips/image/mt7621.mk"
+echo "==> 1. 将后台显示名称篡改为 JCG Q20..."
+sed -i 's/model = "Xiaomi Mi Router CR6606";/model = "JCG Q20";/g' "$DTS_FILE"
 
-install -D -m 0644 "$DTS_SRC" "$DTS_DST"
+echo "==> 2. 覆盖物理端口映射 (WAN/LAN1/LAN2)..."
+cat >> "$DTS_FILE" <<'EOF'
 
-python3 - "$NETWORK" "$LEDS" <<'PY'
-from pathlib import Path
-import sys
+&gmac1 {
+	label = "lan2";
+	phy-handle = <&ethphy4>;
+};
 
-network, leds = Path(sys.argv[1]), Path(sys.argv[2])
-s = network.read_text()
-if "jcg,q20-cr6606)" not in s:
-    marker = "case $board in\n"
-    insert = "case $board in\n\tjcg,q20-cr6606)\n\t\tucidef_set_interfaces_lan_wan \"lan1 lan2\" \"wan\"\n\t\t;;\n"
-    network.write_text(s.replace(marker, insert, 1))
-
-s = leds.read_text()
-if "jcg,q20-cr6606)" not in s:
-    marker = "case $board in\n"
-    insert = "case $board in\n\tjcg,q20-cr6606)\n\t\tucidef_set_led_netdev \"internet\" \"Internet\" \"blue:net\" \"wan\"\n\t\t;;\n"
-    leds.write_text(s.replace(marker, insert, 1))
-PY
-
-if ! grep -q '^define Device/xiaomi_mi-router-cr6606$' "$IMAGE"; then
-	cat >> "$IMAGE" <<'EOF'
-
-define Device/xiaomi_mi-router-cr6606
-  $(Device/xiaomi_mi-router-cr660x)
-  DEVICE_VENDOR := JCG
-  DEVICE_MODEL := Q20
-  DEVICE_DTS := mt7621_xiaomi_mi-router-cr6606
-  SUPPORTED_DEVICES := jcg,q20-cr6606 xiaomi,mi-router-cr6606
-endef
-TARGET_DEVICES += xiaomi_mi-router-cr6606
+&switch0 {
+	ports {
+		port@0 {
+			status = "okay";
+			label = "wan";
+		};
+		port@1 {
+			status = "okay";
+			label = "lan1";
+		};
+		port@2 {
+			status = "disabled";
+		};
+	};
+};
 EOF
-fi
+
+echo "==> 3. 移除多余的 LAN3 接口..."
+sed -i 's/"lan1 lan2 lan3" "wan"/"lan1 lan2" "wan"/g' "$NETWORK_FILE"

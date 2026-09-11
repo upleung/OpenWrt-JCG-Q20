@@ -1,3 +1,0 @@
-jcg,q20-cr6606)
-	ucidef_set_led_netdev "internet" "Internet" "blue:net" "wan"
-	;;

@@ -1,10 +1,10 @@
-name: Build OpenWrt JCG Q20 (CR6606 Base)
+name: Build OpenWrt JCG Q20 Official
 
 on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Release tag (e.g. v23.05.6-jcgq20-r1)"
+        description: "Release tag (例如: v23.05.6-jcgq20-r1)"
         required: true
         default: "v23.05.6-jcgq20-r1"
         type: string
@@ -34,74 +34,77 @@ jobs:
         working-directory: openwrt
         run: ./scripts/feeds update -a && ./scripts/feeds install -a
       
-      - name: 注入端口补丁 (就地篡改)
+      - name: 注入端口及 IP 补丁 (就地篡改)
         run: chmod +x scripts/apply-jcg-q20.sh && ./scripts/apply-jcg-q20.sh openwrt
       
-      - name: 加载编译配置
+      - name: 加载独立编译配置
         working-directory: openwrt
-        run: cp ../config/official.config .config && make defconfig
+        run: |
+          cp ../config/official.config .config
+          make defconfig
       
-      - name: 下载依赖并编译
+      - name: 下载依赖并编译 (约 1-2 小时)
         working-directory: openwrt
         run: |
           make download -j8
           make -j"$(nproc)" V=s || make -j1 V=s
-      
-      - name: 收集并验证固件 (Collect and verify firmware)
+          
+      - name: 提取、匹配并重命名 4 个核心固件
         working-directory: openwrt
         run: |
           set -euo pipefail
-          
           OUTDIR="bin/targets/ramips/mt7621"
-          
-          # 1. 检查输出目录是否存在
-          if [ ! -d "$OUTDIR" ]; then
-            echo "致命错误：输出目录 $OUTDIR 不存在！说明前面 make 编译彻底失败。"
-            exit 1
-          fi
-          
-          echo "==== 打印所有编译输出的文件 ===="
-          find "$OUTDIR" -maxdepth 2 -type f -printf '%P\n' | sort
-          
-          echo "==== 筛选固件候选文件 ===="
-          # 完美融合方案 C：自动抓取当前目录下所有的 .bin 和 .json 文件，无视设备代号
-          mapfile -t FW_FILES < <(
-            find "$OUTDIR" -maxdepth 1 -type f \( -name '*.bin' -o -name '*.json' \) -print | sort
-          )
-          
-          # 2. 严格校验是否生成了固件
-          if [ "${#FW_FILES[@]}" -eq 0 ]; then
-            echo "致命错误：没有检测到任何生成的 .bin 固件！"
-            echo "请往上翻看 'Build OpenWrt' 步骤的报错日志。"
-            exit 1
-          fi
-          
-          # 3. 复制固件到 release 目录
           mkdir -p ../release
-          cp "${FW_FILES[@]}" ../release/
           
-          # 4. 提取实用的编译元数据 (便于日后排查和记录)
-          for f in \
-            profiles.json \
-            config.buildinfo \
-            feeds.buildinfo \
-            version.buildinfo
-          do
-            if [ -f "$OUTDIR/$f" ]; then
-              cp "$OUTDIR/$f" ../release/
-            fi
-          done
+          # 1. 严格抓取原生 CR6606 固件文件
+          FW_BIN=$(find "$OUTDIR" -maxdepth 1 -type f -name "*xiaomi_mi-router-cr6606*squashfs-firmware.bin" | head -n 1)
+          SYS_BIN=$(find "$OUTDIR" -maxdepth 1 -type f -name "*xiaomi_mi-router-cr6606*squashfs-sysupgrade.bin" | head -n 1)
           
-          # 5. 生成 SHA256 校验和
+          if [ -z "$FW_BIN" ] || [ -z "$SYS_BIN" ]; then
+            echo "致命错误：未能生成 CR6606 的 firmware 或 sysupgrade 固件！请检查 config/official.config 中的设备型号是否正确。"
+            ls -lah "$OUTDIR" || true
+            exit 1
+          fi
+          
+          # 提取动态生成的原生文件名
+          BASE_FW=$(basename "$FW_BIN")
+          BASE_SYS=$(basename "$SYS_BIN")
+          
+          echo "==== 1. 拷贝原版 CR6606 名称固件 ===="
+          cp "$FW_BIN" "../release/$BASE_FW"
+          cp "$SYS_BIN" "../release/$BASE_SYS"
+          
+          echo "==== 2. 自动匹配版本号并重命名为 JCG Q20 ===="
+          # Sysupgrade 转换逻辑: xiaomi_mi-router-cr6606 -> jcg_q20
+          JCG_SYS="${BASE_SYS/xiaomi_mi-router-cr6606/jcg_q20}"
+          
+          # Factory 转换逻辑: xiaomi_mi-router-cr6606 -> jcg_q20 且 firmware -> factory
+          JCG_FAC="${BASE_FW/xiaomi_mi-router-cr6606/jcg_q20}"
+          JCG_FAC="${JCG_FAC/firmware/factory}"
+          
+          # 输出新命名的固件
+          cp "$FW_BIN" "../release/$JCG_FAC"
+          cp "$SYS_BIN" "../release/$JCG_SYS"
+          
+          echo "==== 3. 生成 SHA256 校验和 ===="
           cd ../release
-          sha256sum -- *.bin > SHA256SUMS
+          sha256sum *.bin > SHA256SUMS
           
-          echo "==== 最终准备发布的 Release 文件列表 ===="
-          ls -lah
+          echo "==== 检查最终准备发布的 4 个固件 ===="
+          ls -lah *.bin
       
-      - name: 创建 GitHub Release
+      - name: 准备发布元数据
+        id: meta
+        run: |
+          echo "tag=${{ inputs.release_tag || github.ref_name }}" >> $GITHUB_OUTPUT
+      
+      - name: 发布到 GitHub Releases
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.release_tag || github.ref_name }}
+          TAG: ${{ steps.meta.outputs.tag }}
         run: |
-          gh release create "$TAG" release/* --title "OpenWrt 23.05.6 - JCG Q20" --notes "基于 CR6606 原版源码，已完美修复物理 WAN/LAN 错位。" --latest || gh release upload "$TAG" release/* --clobber
+          gh release create "$TAG" release/* \
+            --title "OpenWrt 23.05.6 - JCG Q20" \
+            --notes "### 核心更新<br>- 100% 基于原生 CR6606 底板编译<br>- 物理 WAN/LAN1/LAN2 端口已精准对应<br>- 后台默认 IP 变更为 \`192.168.5.1\`<br><br>附带原生名称与 JCG Q20 定制名称的 Factory/Firmware 与 Sysupgrade 刷机包。" \
+            --latest || \
+          gh release upload "$TAG" release/* --clobber

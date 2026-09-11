@@ -27,7 +27,7 @@
 ```text
 OpenWrt-JCG-Q20/
 ├── .github/workflows/build-jcg-q20.yml
-├── config/cr6606-23.05.6.config
+├── config/jcg-q20-23.05.6.config
 └── scripts/apply-jcg-q20.sh
 
 ```
@@ -85,7 +85,7 @@ echo "==> 补丁注入完成！底层标识依然是 CR6606，完全兼容原厂
 
 ```
 
-**2. 编译配置文件 (`config/cr6606-23.05.6.config`)**
+**2. 编译配置文件 (`config/jcg-q20-23.05.6.config`)**
 锁定目标为官方 CR6606。
 
 ```text
@@ -141,7 +141,7 @@ jobs:
       
       - name: 加载编译配置文件
         working-directory: openwrt
-        run: cp ../config/cr6606-23.05.6.config .config && make defconfig
+        run: cp ../config/jcg-q20-23.05.6.config .config && make defconfig
       
       - name: 下载依赖并编译
         working-directory: openwrt

@@ -62,11 +62,11 @@
 
 **1. 首先让设备正常连接外网**
 
-- [OpenWrt 通过 USB 网卡调用宿主机代理终端连网教程](https://github.com/upleung/OpenWrt-JCG-Q20/raw/refs/heads/main/src/doc/OpenWrt%20%E9%80%9A%E8%BF%87%20USB%20%E7%BD%91%E5%8D%A1%E8%B0%83%E7%94%A8%E5%AE%BF%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86%E7%BB%88%E7%AB%AF%E8%BF%9E%E7%BD%91%E6%95%99%E7%A8%8B.md)
-- [OpenWrt 通过 WAN 口级联调用局域网主机代理连网教程](https://github.com/upleung/OpenWrt-JCG-Q20/raw/refs/heads/main/src/doc/OpenWrt%20%E9%80%9A%E8%BF%87%20WAN%20%E5%8F%A3%E7%BA%A7%E8%81%94%E8%B0%83%E7%94%A8%E5%B1%80%E5%9F%9F%E7%BD%91%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86%E8%BF%9E%E7%BD%91%E6%95%99%E7%A8%8B.md)
+- [OpenWrt 通过 USB 网卡调用宿主机代理终端连网教程](https://raw.githubusercontent.com/upleung/OpenWrt-JCG-Q20/refs/heads/main/src/doc/OpenWrt%20%E9%80%9A%E8%BF%87%20USB%20%E7%BD%91%E5%8D%A1%E8%B0%83%E7%94%A8%E5%AE%BF%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86%E7%BB%88%E7%AB%AF%E8%BF%9E%E7%BD%91%E6%95%99%E7%A8%8B.md)
+- [OpenWrt 通过 WAN 口级联调用局域网主机代理连网教程](https://raw.githubusercontent.com/upleung/OpenWrt-JCG-Q20/refs/heads/main/src/doc/OpenWrt%20%E9%80%9A%E8%BF%87%20WAN%20%E5%8F%A3%E7%BA%A7%E8%81%94%E8%B0%83%E7%94%A8%E5%B1%80%E5%9F%9F%E7%BD%91%E4%B8%BB%E6%9C%BA%E4%BB%A3%E7%90%86%E8%BF%9E%E7%BD%91%E6%95%99%E7%A8%8B.md)
 
 **2. 调试优化与插件安装**
-- [OpenWrt 新设备调优与第三方插件安装教程](https://github.com/upleung/OpenWrt-JCG-Q20/raw/refs/heads/main/src/doc/OpenWrt%20%E6%96%B0%E8%AE%BE%E5%A4%87%E8%B0%83%E4%BC%98%E4%B8%8E%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97.md)
+- [OpenWrt 新设备调优与第三方插件安装教程](https://raw.githubusercontent.com/upleung/OpenWrt-JCG-Q20/refs/heads/main/src/doc/OpenWrt%20%E6%96%B0%E8%AE%BE%E5%A4%87%E8%B0%83%E4%BC%98%E4%B8%8E%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97.md)
 
 **3. 更多教程请参考[DOC](https://github.com/upleung/OpenWrt-JCG-Q20/tree/main/src/doc)文档**
 

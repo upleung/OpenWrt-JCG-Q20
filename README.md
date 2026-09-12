@@ -16,8 +16,11 @@
 ### 固件说明：
 
 - 为什么要这样去编译？因为JCG Q20已经刷了[Xiaomi CR660X](src\img\2.png)的PB-boot系统引导，如果要刷官方原版OpenWrt，那只能刷 `CR6606`的版本，但是 `JCG Q20` 和 `CR6606` 的硬件配置有差距，刷了之后网络端口映射会变乱，假如你折腾换系统引导，或直接就刷入`JCG Q20`的OpenWrt升级包，那很大概率会变砖（去年折腾实测已变砖一台），为了达到最稳定的效果，因此需要从固件底层去修改固定映射，于是就有了本项目的解决方案；
+  
 <br>
+
 - 本项目编译固件只做两个修复：1.修复物理端口映射；2.更正设备型号名称。
+
 <br>
 
 - 稳定版固件请使用该[Releases](https://github.com/upleung/OpenWrt-JCG-Q20/releases/tag/v23.05.6-jcgq20-r3)版本，编译固件为 `OpenWrt 23.05.6`稳定版，本项目 Github Actions 跑通后，后续可以直接编译 `OpenWrt 24.10.8`，甚至 `OpenWrt 25.12.5`（新版需要优化一下workflows和源码）

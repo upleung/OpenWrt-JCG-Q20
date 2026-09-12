@@ -48,8 +48,15 @@
 
 ### 相关说明文档
 
-[通过 USB 网卡调用宿主机代理终端连网教程（即让设备连接外网）]()
-[更多教程请参考DOC](https://github.com/upleung/OpenWrt-JCG-Q20/tree/main/src/doc)
+**1. 首先让设备正常连接外网**
+
+- [OpenWrt 通过 USB 网卡调用宿主机代理终端连网教程]()
+- [OpenWrt 通过 WAN 口级联调用局域网主机代理连网教程]()
+
+**2. 调试优化与插件安装**
+- [OpenWrt 新设备调优与第三方插件安装教程]()
+
+**3. 更多教程请参考[DOC](https://github.com/upleung/OpenWrt-JCG-Q20/tree/main/src/doc)文档**
 
 ---
 

@@ -3,14 +3,14 @@
 # 编译的固件实测可用
 
 - 设备型号：JCG Q20
-- PB-boot：PandoraBox ([必须是Xiaomi CR660X版本](src\img\2.png))
+- PB-boot：PandoraBox ([必须是Xiaomi CR660X版本](./src/img/2.png))
 - 系统版本：OpenWrt 23.05.6
 - 默认IP登录地址：192.168.5.1
 - 官方源码底板：[xiaomi_mi-router-cr6606](https://downloads.openwrt.org/releases/24.10.8/targets/ramips/mt7621/)
 - 主要修复：物理 `WAN/LAN1/LAN2` 端口映射，更正 `OpenWrt` 概览页型号（由 `Xiaomi Mi Router CR6606` 更正为为 `JCG Q20` ，其他保持原生未修改）
 
 
-![OpenWrt概览](src\img\1.png)
+![OpenWrt概览](./src/img/1.png)
 
 
 ### 固件说明：
@@ -39,7 +39,7 @@
 3.注意：刷机有风险！请做好备份，本仓库固件仅编译自用，分享出来仅供参考，不是所有人的刷机建议。
 
 
-![OpenWrt后台升级](src\img\3.png)
+![OpenWrt概览](./src/img/3.png)
 
 
 # Actions-OpenWrt

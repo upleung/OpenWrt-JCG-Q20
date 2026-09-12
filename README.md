@@ -33,10 +33,15 @@
 ### 刷机说明：
 
 1.务必检查：设备型号是`JCG Q20`,已刷入[Xiaomi CR660X](src\img\2.png)版PandoraBox（PB-boot），已刷入第三方编译的OpenWrt，或已刷入[Xiaomi CR660X](src\img\2.png)官方版OpenWrt。
+
 <br>
+
 2.刷入方法：直接在OpenWrt后台上传本仓库已编译好的 [sysupgrade.bin](https://github.com/upleung/OpenWrt-JCG-Q20/releases/download/v23.05.6-jcgq20-r3/openwrt-ramips-mt7621-jcg_q20-squashfs-sysupgrade.bin)（不用勾选备份配置），或者进入PB-boot先刷 [factory.bin](https://github.com/upleung/OpenWrt-JCG-Q20/releases/download/v23.05.6-jcgq20-r3/openwrt-ramips-mt7621-jcg_q20-squashfs-factory.bin) 底包，再进入OpenWrt后台刷[sysupgrade.bin](https://github.com/upleung/OpenWrt-JCG-Q20/releases/download/v23.05.6-jcgq20-r3/openwrt-ramips-mt7621-jcg_q20-squashfs-sysupgrade.bin) 也行（原理是一样的）。
+
 <br>
+
 我本次刷机使用的方法是： `JCG Q20`第三方 `OpenWrt 23.05.1`（有广告）➡️ 先升级 `Xiaomi CR6606`  官方 `OpenWrt 23.05.5` ➡️ 再升级本仓库编译的 修正版 官方 `OpenWrt 23.05.6` 稳定版
+
 <br>
 
 3.注意：刷机有风险！请做好备份，本仓库固件仅编译自用，分享出来仅供参考，不是所有人的刷机建议。

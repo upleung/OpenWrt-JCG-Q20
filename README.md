@@ -32,7 +32,7 @@
 
 ### 刷机说明：
 
-1.务必检查：设备型号是`JCG Q20`,已刷入[Xiaomi CR660X](src\img\2.png)版PandoraBox（PB-boot），已刷入第三方编译的OpenWrt，或已刷入 `Xiaomi CR660X` 官方版OpenWrt。
+1.务必检查：设备型号是`JCG Q20`,已刷入 `Xiaomi CR660X` 版PandoraBox（PB-boot），已刷入第三方编译的OpenWrt，或已刷入 `Xiaomi CR660X` 官方版OpenWrt。
 
 <br>
 

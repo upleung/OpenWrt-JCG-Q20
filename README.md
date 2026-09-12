@@ -38,9 +38,20 @@
 
 3.注意：刷机有风险！请做好备份，本仓库固件仅编译自用，分享出来仅供参考，不是所有人的刷机建议。
 
+<details>
+  <summary>点击查看项目截图</summary>
+  <img src="./src/img/3.png" alt="后台升级界面" style="max-width:600px">
+  <img src="./src/img/4.png" alt="SSH连接" style="max-width:600px">
+  <img src="./src/img/5.png" alt="设置代理后opkg更新" style="max-width:600px">
+</details>
 
-![OpenWrt概览](./src/img/3.png)
 
+### 相关说明文档
+
+[通过 USB 网卡调用宿主机代理终端连网教程（即让设备连接外网）]()
+[更多教程请参考DOC](https://github.com/upleung/OpenWrt-JCG-Q20/tree/main/src/doc)
+
+---
 
 # Actions-OpenWrt
 

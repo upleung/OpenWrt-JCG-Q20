@@ -131,4 +131,4 @@ v2ray_off
 **常见排障：**
 
 * **执行 `source /etc/profile` 报错 `syntax error: bad function name**`：说明之前写入的文件包含了带连字符的函数名（如 `v2ray-on`）。执行 `sed -i '/v2ray/,$d' /etc/profile` 和 `sed -i '/HOST_IP/,$d' /etc/profile` 清理残留，然后重新执行第四步的纯净代码。
-* **连通性测试报错 `curl: not found**`：OpenWrt 默认极简，通常不内置 `curl`。开启代理后，若要测试连通性，可使用系统自带的 `wget` 命令：`wget -qO- https://www.google.com | head -n 5`。
+* **连通性测试报错 `curl: not found**`：OpenWrt 默认极简，通常不内置 `curl`。开启代理后，若要测试连通性，可使用系统自带的 `wget` 命令：`wget -qO- https://www.google.com | head -n 5`

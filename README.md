@@ -6,7 +6,7 @@
 - 默认IP登录地址：192.168.5.1
 - 官方源码底板：[xiaomi_mi-router-cr6606](https://downloads.openwrt.org/releases/24.10.8/targets/ramips/mt7621/)
 - 主要修复：物理 `WAN/LAN1/LAN2` 端口映射，更正 `OpenWrt` 概览页型号（由 `Xiaomi Mi Router CR6606` 更正为为 `JCG Q20` ，其他均为未修改）
-- 特点：原生系统，纯净，稳定
+- 特点：原生系统，纯净，稳定，轻量化运行
 
 
 ![OpenWrt概览](./src/img/1.png)

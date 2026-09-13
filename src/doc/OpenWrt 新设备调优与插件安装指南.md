@@ -19,10 +19,10 @@
 # 1. 更新软件源
 opkg update
 
-# 2. 安装基础依赖组件
-opkg install curl wget-ssl ca-certificates unzip tar jq htop vim
+# 2. 安装基础依赖工具类组件(可选)
+opkg install unzip tar jq htop vim
 
-# 3. 调整系统时区为 CST-8（北京时间）
+# 3. 调整系统时区为 CST-8（北京时间）(可选)
 uci set system.@system[0].zonename='Asia/Shanghai'
 uci set system.@system[0].timezone='CST-8'
 uci commit system
@@ -43,7 +43,7 @@ uci commit system
 opkg install luci-i18n-base-zh-cn luci-i18n-firewall-zh-cn luci-theme-argon luci-i18n-argon-config-zh-cn
 
 # 2. 下载并安装 Neobird 主题 (第三方库引入)
-wget -O /tmp/neobird.ipk [https://github.com/thinkst20/luci-theme-neobird/releases/latest/download/luci-theme-neobird_all.ipk](https://github.com/thinkst20/luci-theme-neobird/releases/latest/download/luci-theme-neobird_all.ipk)
+wget -O /tmp/neobird.ipk https://github.com/thinkst20/luci-theme-neobird/releases/latest/download/luci-theme-neobird_all.ipk
 opkg install /tmp/neobird.ipk
 
 ```

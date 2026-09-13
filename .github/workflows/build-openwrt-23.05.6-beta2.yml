@@ -1,4 +1,4 @@
-name: Build OpenWrt JCG Q20 Official
+name: Build OpenWrt JCG Q20 Beta (Add plugin)
 
 on:
   workflow_dispatch:
@@ -8,6 +8,11 @@ on:
         required: true
         default: "v1.0.0"
         type: string
+      is_prerelease:
+        description: "是否作为预发布(Pre-release)？勾选则不抢占 Latest 标签"
+        required: true
+        type: boolean
+        default: true
   push:
     tags:
       - "v*"
@@ -30,9 +35,28 @@ jobs:
       - name: 拉取官方 23.05.6 源码
         run: git clone --depth 1 --branch "${OPENWRT_TAG}" https://github.com/openwrt/openwrt.git openwrt
       
-      - name: 更新 Feeds
+      - name: 注入第三方插件并更新 Feeds
         working-directory: openwrt
-        run: ./scripts/feeds update -a && ./scripts/feeds install -a
+        run: |
+          # 1. 注入 PassWall2 的软件源
+          echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> feeds.conf.default
+          echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> feeds.conf.default
+          
+          # 2. 注入 OpenClash 软件源
+          echo "src-git openclash https://github.com/vernesong/OpenClash.git;master" >> feeds.conf.default
+          
+          # 3. 更新所有 feeds
+          ./scripts/feeds update -a
+          
+          # 4. 拉取 Argon 主题及配置插件源码到 package 目录
+          git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
+          git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config.git package/luci-app-argon-config
+          
+          # 5. 拉取 Neobird 主题源码
+          git clone --depth=1 https://github.com/rchen14b/luci-theme-glass.git package/luci-theme-glass
+          
+          # 6. 安装所有 feeds 包
+          ./scripts/feeds install -a
       
       - name: 注入端口及 IP 补丁 (就地篡改)
         run: chmod +x scripts/apply-jcg-q20.sh && ./scripts/apply-jcg-q20.sh openwrt
@@ -40,16 +64,16 @@ jobs:
       - name: 加载独立编译配置
         working-directory: openwrt
         run: |
-          cp ../config/official.config .config
+          cp ../config/beat.config .config
           make defconfig
       
-      - name: 下载依赖并编译 (约 1-2 小时)
+      - name: 下载依赖并编译 (静默模式，出错时打印日志)
         working-directory: openwrt
         run: |
           make download -j8
-          make -j"$(nproc)" V=s || make -j1 V=s
+          make -j"$(nproc)" > /dev/null 2>&1 || make -j1 V=s
           
-      - name: 提取、匹配并重命名 4 个核心固件
+      - name: 提取固件及编译元数据
         working-directory: openwrt
         run: |
           set -euo pipefail
@@ -62,11 +86,9 @@ jobs:
           
           if [ -z "$FW_BIN" ] || [ -z "$SYS_BIN" ]; then
             echo "致命错误：未能生成 CR6606 的 firmware 或 sysupgrade 固件！请检查 config/official.config 中的设备型号是否正确。"
-            ls -lah "$OUTDIR" || true
             exit 1
           fi
           
-          # 提取动态生成的原生文件名
           BASE_FW=$(basename "$FW_BIN")
           BASE_SYS=$(basename "$SYS_BIN")
           
@@ -75,28 +97,38 @@ jobs:
           cp "$SYS_BIN" "../release/$BASE_SYS"
           
           echo "==== 2. 自动匹配版本号并重命名为 JCG Q20 ===="
-          # Sysupgrade 转换逻辑: xiaomi_mi-router-cr6606 -> jcg_q20
           JCG_SYS="${BASE_SYS/xiaomi_mi-router-cr6606/jcg_q20}"
-          
-          # Factory 转换逻辑: xiaomi_mi-router-cr6606 -> jcg_q20 且 firmware -> factory
           JCG_FAC="${BASE_FW/xiaomi_mi-router-cr6606/jcg_q20}"
           JCG_FAC="${JCG_FAC/firmware/factory}"
           
-          # 输出新命名的固件
           cp "$FW_BIN" "../release/$JCG_FAC"
           cp "$SYS_BIN" "../release/$JCG_SYS"
           
-          echo "==== 3. 生成 SHA256 校验和 ===="
-          cd ../release
-          sha256sum *.bin > SHA256SUMS
+          echo "==== 3. 提取编译元数据 ===="
+          for f in profiles.json config.buildinfo feeds.buildinfo version.buildinfo; do
+            if [ -f "$OUTDIR/$f" ]; then
+              cp "$OUTDIR/$f" ../release/
+            fi
+          done
           
-          echo "==== 检查最终准备发布的 4 个固件 ===="
-          ls -lah *.bin
+          echo "==== 4. 生成 SHA256 校验和 ===="
+          cd ../release
+          sha256sum * > SHA256SUMS
+          
+          echo "==== 检查最终准备发布的所有文件 ===="
+          ls -lah
       
       - name: 准备发布元数据
         id: meta
         run: |
           echo "tag=${{ inputs.release_tag || github.ref_name }}" >> $GITHUB_OUTPUT
+          
+          # 动态判断是否使用 --prerelease 还是 --latest
+          if [ "${{ inputs.is_prerelease }}" == "true" ]; then
+            echo "RELEASE_FLAG=--prerelease" >> $GITHUB_ENV
+          else
+            echo "RELEASE_FLAG=--latest" >> $GITHUB_ENV
+          fi
       
       - name: 发布到 GitHub Releases
         env:
@@ -105,6 +137,6 @@ jobs:
         run: |
           gh release create "$TAG" release/* \
             --title "OpenWrt 23.05.6 - JCG Q20" \
-            --notes "### 核心更新<br>- 100% 基于原生 CR6606 底板编译<br>- 物理 WAN/LAN1/LAN2 端口已精准对应<br>- 后台默认 IP 变更为 \`192.168.5.1\`<br><br>附带原生名称与 JCG Q20 定制名称的 Factory/Firmware 与 Sysupgrade 刷机包。" \
-            --latest || \
+            --notes "### 核心更新<br>- 100% 基于原生 CR6606 底板编译<br>- 物理 WAN/LAN1/LAN2 端口已精准对应<br>- 后台默认 IP 变更为 \`192.168.5.1\`<br>- 附带配置文件及元数据方便排查溯源。<br><br>附带原生名称与 JCG Q20 定制名称的 Factory/Firmware 与 Sysupgrade 刷机包。" \
+            $RELEASE_FLAG || \
           gh release upload "$TAG" release/* --clobber

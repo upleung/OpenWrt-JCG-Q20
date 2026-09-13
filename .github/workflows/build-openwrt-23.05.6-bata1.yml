@@ -1,12 +1,12 @@
-name: Build OpenWrt JCG Q20 V1 TEST
+name: Build OpenWrt JCG Q20 Beta (Test)
 
 on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Release tag, e.g. v23.05.6-jcgq20-r1"
+        description: "Release tag, e.g. v1.3.6"
         required: true
-        default: "v23.05.6-jcgq20-r1"
+        default: "v1.0.0"
         type: string
       publish_release:
         description: "Create or update GitHub Release"
@@ -15,7 +15,7 @@ on:
         type: boolean
   push:
     tags:
-      - "v23.05.6-jcgq20-r*"
+      - "v*"
 
 permissions:
   contents: write

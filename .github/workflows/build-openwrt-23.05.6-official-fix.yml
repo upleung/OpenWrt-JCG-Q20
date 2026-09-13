@@ -1,4 +1,4 @@
-name: Build OpenWrt JCG Q20 Official
+name: Build OpenWrt JCG Q20 Official Fix
 
 on:
   workflow_dispatch:
@@ -40,14 +40,15 @@ jobs:
       - name: 加载独立编译配置
         working-directory: openwrt
         run: |
-          cp ../config/official.config .config
+          cp ../official-fix.config .config
           make defconfig
       
-      - name: 下载依赖并编译 (约 1-2 小时)
+      - name: 下载依赖并编译 (静默模式，出错时打印日志)
         working-directory: openwrt
         run: |
           make download -j8
-          make -j"$(nproc)" V=s || make -j1 V=s
+          # 将普通编译的日志全部丢弃，只有在编译失败时，才执行单线程并打印 V=s 详细错误
+          make -j"$(nproc)" > /dev/null 2>&1 || make -j1 V=s
           
       - name: 提取、匹配并重命名 4 个核心固件
         working-directory: openwrt

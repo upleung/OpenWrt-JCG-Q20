@@ -30,7 +30,7 @@ Release 标题继续保持 `OpenWrt 23.05.6 - JCG Q20` 用来告知用户底层�
 
 **关于替换 Glass 主题**
 
-你的理解**完全正确**。OpenWrt 第三方插件和主题的编译逻辑非常标准化，你列出的两步操作没有任何问题：
+你的理解**完全正确**。**OpenWrt** 第三方插件和主题的编译逻辑非常标准化，你列出的两步操作没有任何问题：
 
 1. **在 YAML 中更改源码拉取地址**：
 `git clone --depth=1 [https://github.com/rchen14b/luci-theme-glass.git](https://github.com/rchen14b/luci-theme-glass.git) package/luci-theme-glass`

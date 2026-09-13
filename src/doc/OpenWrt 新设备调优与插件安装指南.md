@@ -112,7 +112,7 @@ opkg install /tmp/openclash.ipk
 mkdir -p /tmp/passwall2 && cd /tmp/passwall2
 
 # 2. 下载针对 mipsel_24kc 架构打包的 PassWall 2 组件包合集
-wget [https://github.com/Openwrt-Passwall/openwrt-passwall2/releases/latest/download/passwall2_packages_mipsel_24kc.zip](https://github.com/Openwrt-Passwall/openwrt-passwall2/releases/latest/download/passwall2_packages_mipsel_24kc.zip)
+wget https://github.com/Openwrt-Passwall/openwrt-passwall2/releases/latest/download/passwall2_packages_mipsel_24kc.zip
 
 # 3. 解压缩包
 unzip passwall2_packages_mipsel_24kc.zip

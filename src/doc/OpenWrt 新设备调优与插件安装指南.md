@@ -61,7 +61,10 @@ opkg install /tmp/neobird.ipk
 opkg install ddns-scripts-cloudflare luci-app-ddns luci-i18n-ddns-zh-cn
 
 # 2. 安装 rtp2httpd (常用于 IPTV 组播转 HTTP 单播)
-opkg install rtp2httpd
+
+uclient-fetch -q -O - https://raw.githubusercontent.com/stackia/rtp2httpd/main/scripts/install-openwrt.sh | sh
+
+opkg install rtp2httpd_3.17.1-r1_mipsel_24kc.ipk luci-app-rtp2httpd_3.17.1-r1_all.ipk luci-i18n-rtp2httpd-zh-cn_3.17.1_all.ipk
 
 ```
 

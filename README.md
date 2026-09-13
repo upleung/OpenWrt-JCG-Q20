@@ -1,4 +1,10 @@
-**English** | [中文](https://p3terx.com/archives/build-openwrt-with-github-actions.html)
+# 分支版本备注
+
+- main : 正式稳定版更新
+- v2 : rc正常版本预发布备份
+- v1 : beta初版测试版备份
+
+---
 
 # Actions-OpenWrt
 

@@ -1,0 +1,116 @@
+name: Build OpenWrt JCG Q20 Official v25.12.5
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (例如: v1.3.6)"
+        required: true
+        default: "v1.0.0"
+        type: string
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  OPENWRT_TAG: "v25.12.5"
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: 安装编译环境
+        run: sudo apt-get update && sudo apt-get install -y build-essential clang flex bison g++ gawk gcc-multilib gettext git libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev file wget device-tree-compiler
+      
+      - name: 拉取官方 25.12.5 源码
+        run: git clone --depth 1 --branch "${OPENWRT_TAG}" https://github.com/openwrt/openwrt.git openwrt
+      
+      - name: 更新 Feeds
+        working-directory: openwrt
+        run: ./scripts/feeds update -a && ./scripts/feeds install -a
+      
+      - name: 注入端口及 IP 补丁 (就地篡改)
+        run: chmod +x scripts/apply-jcg-q20.sh && ./scripts/apply-jcg-q20.sh openwrt
+      
+      - name: 加载独立编译配置
+        working-directory: openwrt
+        run: |
+          cp ../config/official.config .config
+          make defconfig
+      
+      - name: 下载依赖并编译 (约 1-2 小时)
+        working-directory: openwrt
+        run: |
+          make download -j8
+          make -j"$(nproc)" V=s || make -j1 V=s
+          
+      - name: 提取、匹配并重命名 4 个核心固件
+        working-directory: openwrt
+        run: |
+          set -euo pipefail
+          OUTDIR="bin/targets/ramips/mt7621"
+          
+          if [ ! -d "$OUTDIR" ]; then
+            echo "致命错误：未找到编译输出目录，编译已彻底失败！"
+            exit 1
+          fi
+          
+          mkdir -p ../release
+          
+          # 1. 严格抓取原生 CR6606 固件文件
+          FW_BIN=$(find "$OUTDIR" -maxdepth 1 -type f -name "*xiaomi_mi-router-cr6606*squashfs-firmware.bin" | head -n 1)
+          SYS_BIN=$(find "$OUTDIR" -maxdepth 1 -type f -name "*xiaomi_mi-router-cr6606*squashfs-sysupgrade.bin" | head -n 1)
+          
+          if [ -z "$FW_BIN" ] || [ -z "$SYS_BIN" ]; then
+            echo "致命错误：未能生成 CR6606 的 firmware 或 sysupgrade 固件！请检查 config/official.config 中的设备型号是否正确。"
+            ls -lah "$OUTDIR" || true
+            exit 1
+          fi
+          
+          # 提取动态生成的原生文件名
+          BASE_FW=$(basename "$FW_BIN")
+          BASE_SYS=$(basename "$SYS_BIN")
+          
+          echo "==== 1. 拷贝原版 CR6606 名称固件 ===="
+          cp "$FW_BIN" "../release/$BASE_FW"
+          cp "$SYS_BIN" "../release/$BASE_SYS"
+          
+          echo "==== 2. 自动匹配版本号并重命名为 JCG Q20 ===="
+          # Sysupgrade 转换逻辑: xiaomi_mi-router-cr6606 -> jcg_q20
+          JCG_SYS="${BASE_SYS/xiaomi_mi-router-cr6606/jcg_q20}"
+          
+          # Factory 转换逻辑: xiaomi_mi-router-cr6606 -> jcg_q20 且 firmware -> factory
+          JCG_FAC="${BASE_FW/xiaomi_mi-router-cr6606/jcg_q20}"
+          JCG_FAC="${JCG_FAC/firmware/factory}"
+          
+          # 输出新命名的固件
+          cp "$FW_BIN" "../release/$JCG_FAC"
+          cp "$SYS_BIN" "../release/$JCG_SYS"
+          
+          echo "==== 3. 生成 SHA256 校验和 ===="
+          cd ../release
+          sha256sum *.bin > SHA256SUMS
+          
+          echo "==== 检查最终准备发布的 4 个固件 ===="
+          ls -lah *.bin
+      
+      - name: 准备发布元数据
+        id: meta
+        run: |
+          echo "tag=${{ inputs.release_tag || github.ref_name }}" >> $GITHUB_OUTPUT
+      
+      - name: 发布到 GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          gh release create "$TAG" release/* \
+            --title "OpenWrt ${OPENWRT_TAG#v} - JCG Q20" \
+            --notes "### 核心更新<br>- 100% 基于原生 CR6606 底板编译<br>- 物理 WAN/LAN1/LAN2 端口精准对应<br>- 后台默认 IP 变更为 \`192.168.5.1\`<br><br>附带原生名称与 JCG Q20 定制名称的 Factory/Firmware 与 Sysupgrade 刷机包。" \
+            --latest || \
+          gh release upload "$TAG" release/* --clobber

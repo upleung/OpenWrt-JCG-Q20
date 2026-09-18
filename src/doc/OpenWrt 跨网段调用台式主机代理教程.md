@@ -129,3 +129,25 @@ opkg update
 > **原理说明：为什么没有回环错误？**
 > 我们使用的是**应用层环境变量代理**，只是告诉 `opkg` 这个软件去走代理，并没有修改 OpenWrt 的底层 `iptables` 路由表。PC 代理后的流量依然会按正常路径走华硕 -> OpenWrt -> 互联网，是清晰的单向流动，不会产生逻辑死循环。
 
+
+
+
+#### Step 5: 删除与重写配置
+
+
+要删除之前写入的配置，我们需要编辑 `/etc/profile` 文件，把上次添加的 `v2ray_on()` 和 `v2ray_off()` 函数内容清理干净。
+
+推荐使用 `sed` 命令自动删掉这部分内容，然后再重新写入新的配置。
+
+1. **清理旧配置:** OpenWrt 端.
+在 OpenWrt (192.168.50.1) 的 SSH 终端中执行以下命令，它会删掉 `/etc/profile` 文件中所有包含 `v2ray_on`、`v2ray_off` 以及它们内部代码的行：
+
+```bash
+sed -i '/v2ray_on()/,/EOF/d; /v2ray_off()/,/EOF/d; /export HOST_IP=/d; /export PORT=/d; /export http_proxy=/d; /export https_proxy=/d; /export ALL_PROXY=/d; /Proxy enabled/d; /Proxy disabled/d; /unset http_proxy/d' /etc/profile
+
+```
+
+*说明：这个命令非常安全，只会精准删除我们上次写入的代理环境变量和函数，不会影响系统的其他默认配置。*
+
+
+2. **然后重新写入新配置即可**

@@ -1,185 +1,40 @@
-**最重要的一句话：**  
-通常项目里，**img（图片）放在 `assets/` 或 `public/` 下的 `images/` 子目录；docs（文档）放在仓库根目录的 `docs/` 文件夹。**  
-这是 GitHub、前端、后端、开源项目最通用的标准结构。  [Github](https://github.com/kriasoft/Folder-Structure-Conventions)
+你的感觉很敏锐，当前的 `v23.05.6-jcgq20-r1` 确实显得冗余。Release 标题已经清晰标注了“OpenWrt 23.05.6 - JCG Q20”，TAG 再带上这些信息会导致信息重复。在专业软件开发中，TAG 通常只用来标记**代码本身的迭代进度**，越简练越好。
 
-下面给你一个专业级、可直接复制到你项目里的结构方案。
+**专业版本管理：语义化版本（SemVer）规范**
 
----
+业界通用的标准格式为 `v主版本号.次版本号.修订号`（vMAJOR.MINOR.PATCH），各数字的递增代表着不同级别的更新：
 
-# ✅ 标准专业项目结构（适用于前端/后端/开源项目）
+* **主版本号 (Major) - 例如 `v1.x.x` 到 `v2.x.x**`：代表发生了**不兼容的重大修改**或底层大重构。针对你的项目，如果你从基于 OpenWrt 23.05 彻底换成了基于 24.10 的代码底板进行编译，这属于系统底层的巨大变化，就可以升级为 `v2.0.0`。
+* **次版本号 (Minor) - 例如 `v1.2.x` 到 `v1.3.0**`：代表**增加了新功能**，且向下兼容。比如你修改了 `official-fix-addnet.config`，在固件里新加了之前没有的科学上网插件或新主题，就从 `v1.2.2` 升级到 `v1.3.0`（此时末尾的修订号清零）。
+* **修订号 (Patch) - 例如 `v1.3.6` 到 `v1.3.7**`：代表仅仅**修复了 Bug**。比如你发现网口映射反了，去修改了 DTS 文件代码，或者修复了编译脚本的一个小错误，就递增最后一位。
 
-```
-project-root/
-│
-├── src/                # 源代码（核心逻辑）
-│
-├── public/             # 静态资源（前端项目常用）
-│   └── images/         # 图片（logo、banner、图标）
-│
-├── assets/             # 资源文件（后端/工具类项目常用）
-│   ├── images/         # 图片
-│   ├── fonts/          # 字体
-│   └── icons/          # 图标
-│
-├── docs/               # 文档（说明书、设计文档、API 文档）
-│   ├── architecture.md
-│   ├── api.md
-│   └── changelog.md
-│
-├── test/               # 自动化测试
-│
-├── tools/              # 工具脚本
-│
-├── README.md           # 项目说明
-└── LICENSE
-```
+**先行版本号：Alpha 与 Beta 的应用**
 
-这个结构来自 GitHub 官方推荐的项目布局示例（如 `build/`, `docs/`, `src/`, `test/`）  [Github](https://github.com/kriasoft/Folder-Structure-Conventions)  
-并结合现代代码组织最佳实践（如将静态资源放在 `assets/` 或 `public/`）  [GeeksForGeeks](https://www.geeksforgeeks.org/javascript/file-and-folder-organization-best-practices-for-web-development/)。
+它们直接跟在版本号后面，用连字符连接，专门用于在正式版（如 `v1.0.0`）发布前标识“不稳定的测试阶段”：
+
+* **Alpha (内测版)**：极早期版本，功能不全，随时可能崩溃。通常是你自己刚写完编译脚本、不知能不能成功刷机时自己测试用的，比如 `v1.0.0-alpha1`。
+* **Beta (公测版)**：核心功能已完成，但可能存在潜藏 Bug。当你觉得固件可以用，放出来邀请网友帮你一起测试稳定性时，标记为 `v1.0.0-beta1`。
+* **应用逻辑**：演进顺序通常是 `v1.0.0-alpha1` -> `v1.0.0-beta1` -> `v1.0.0-rc` (Release Candidate 候选版) -> 最终正式发布 `v1.0.0`。日常小更新（如 `v1.3.6`）如果不涉及高风险改动，一般直接发正式版，不需要带 Alpha/Beta。
+
+**你的项目 TAG 建议**
+
+建议直接舍弃 `v23.05.6-jcgq20-r1`，回归简洁：
+
+* 初始跑通的稳定发布：`v1.0.0`
+* 只修复了编译配置文件的小错误：`v1.0.1`
+* 新加了插件或主题大礼包：`v1.1.0`
+
+Release 标题继续保持 `OpenWrt 23.05.6 - JCG Q20` 用来告知用户底层系统是什么，而 TAG 纯粹用来管理你的仓库版本。
 
 ---
 
-# 📁 图片 img 应该放哪里？
+**关于替换 Glass 主题**
 
-## **前端项目（React / Vue / Next.js / Vite）**
-推荐：
+你的理解**完全正确**。**OpenWrt** 第三方插件和主题的编译逻辑非常标准化，你列出的两步操作没有任何问题：
 
-```
-public/images/
-src/assets/images/
-```
+1. **在 YAML 中更改源码拉取地址**：
+`git clone --depth=1 [https://github.com/rchen14b/luci-theme-glass.git](https://github.com/rchen14b/luci-theme-glass.git) package/luci-theme-glass`
+2. **在 .config 中更改开启开关**：
+删除旧的主题行，换成 `CONFIG_PACKAGE_luci-theme-glass=y`
 
-理由：
-
-- `public/` 下的图片可直接通过 URL 访问（适合 logo、favicon）
-- `src/assets/images/` 适合组件内部引用（打包优化）
-
----
-
-## **后端项目（Node.js / Python / Go）**
-推荐：
-
-```
-assets/images/
-```
-
-理由：
-
-- 后端不会直接暴露静态资源，通常由 Nginx 或前端处理
-- `assets/` 是后端项目通用的资源目录（GitHub 多个项目采用此结构）  [Github](https://github.com/kriasoft/Folder-Structure-Conventions)
-
----
-
-## **工具类 / CLI / 库项目**
-推荐：
-
-```
-assets/
-```
-
-例如：
-
-```
-assets/logo.png
-assets/templates/
-```
-
----
-
-# 📁 文档 docs 应该放哪里？
-
-标准答案：
-
-```
-docs/
-```
-
-这是 GitHub 官方推荐的文档目录结构（如 `docs/faq.md`, `docs/misc.md`）  [Github](https://github.com/kriasoft/Folder-Structure-Conventions)。
-
-适合放：
-
-- API 文档
-- 架构设计
-- 使用说明
-- 版本变更日志
-- 设计图（可以放 docs/images/）
-
-示例：
-
-```
-docs/
-├── api/
-│   └── v1.md
-├── architecture/
-│   └── overview.md
-├── images/
-│   └── system-diagram.png
-└── changelog.md
-```
-
----
-
-# 🧭 为什么图片不放 docs/？
-
-因为：
-
-- docs 是文档目录，不适合放项目运行需要的图片
-- 图片属于静态资源，应放在 assets/public/images
-- docs/images 只用于文档插图，不用于项目运行
-
----
-
-# 🧭 为什么不把图片放在 src/？
-
-因为：
-
-- src 是代码目录，放图片会导致构建工具处理不一致
-- 图片属于资源，不属于代码逻辑
-
-现代最佳实践明确建议将静态资源放在 assets/public，而不是 src  [GeeksForGeeks](https://www.geeksforgeeks.org/javascript/file-and-folder-organization-best-practices-for-web-development/)。
-
----
-
-# 🎯 最推荐的最终结构（你可以直接用）
-
-适合你这种专业开发项目：
-
-```
-project/
-│
-├── src/
-│
-├── public/
-│   └── images/          # 前端可直接访问的图片
-│
-├── assets/
-│   ├── images/          # 项目内部使用的图片
-│   └── icons/
-│
-├── docs/
-│   ├── api/
-│   ├── architecture/
-│   └── images/          # 文档插图
-│
-├── test/
-│
-├── tools/
-│
-├── README.md
-└── LICENSE
-```
-
----
-
-# 📌 给你一个判断表（非常实用）
-
-| 文件类型 | 推荐目录 | 用途 |
-|---------|----------|------|
-| 项目运行需要的图片 | `assets/images/` | 代码引用 |
-| 前端页面展示图片 | `public/images/` | URL 访问 |
-| 文档插图 | `docs/images/` | 文档说明 |
-| 文档（Markdown） | `docs/` | API、架构、说明书 |
-| 代码 | `src/` | 主逻辑 |
-| 测试 | `test/` | 自动化测试 |
-
----
+只要目标仓库是一个符合 OpenWrt LuCI 标准规范的独立包，编译器在 `make defconfig` 阶段就会自动扫描到 `package/` 目录下的新包，读取你的 `.config` 需求，并将其顺利打包进固件中。

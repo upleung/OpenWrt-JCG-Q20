@@ -40,7 +40,7 @@ jobs:
       - name: 加载独立编译配置
         working-directory: openwrt
         run: |
-          cp ../official-fix.config .config
+          cp ../config/official_fix.config .config
           make defconfig
       
       - name: 下载依赖并编译 (静默模式，出错时打印日志)
